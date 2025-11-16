@@ -12,57 +12,124 @@ A blockchain-based identity, resume, and credential verification platform levera
 └── docs/                  # Additional documentation
 ```
 
-## Quick Start
+## Quick Start (Windows)
 
 ### Prerequisites
-- Node.js 18+
-- Rust (latest stable)
-- Solana CLI
-- Anchor Framework v0.29.0
-- PostgreSQL (or Supabase)
+- **Node.js 18+** - Download from [nodejs.org](https://nodejs.org/)
+- **Git for Windows** - Download from [git-scm.com](https://git-scm.com/download/win)
+- **Rust** (latest stable) - Install via [rustup.rs](https://rustup.rs/)
+- **Solana CLI** - See installation below
+- **Anchor Framework** v0.29.0 - See installation below
+- **PostgreSQL** - Download from [postgresql.org](https://www.postgresql.org/download/windows/) OR use Supabase
 
-### Installation
+### Installation (Windows PowerShell)
 
-1. **Install Solana & Anchor**
-   ```bash
-   # Install Solana CLI
-   sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+1. **Install Rust** (if not already installed)
+   ```powershell
+   # Download and run rustup-init.exe from https://rustup.rs/
+   # Or use PowerShell:
+   Invoke-WebRequest -Uri https://win.rustup.rs/x86_64 -OutFile rustup-init.exe
+   .\rustup-init.exe
+   # Restart PowerShell after installation
+   ```
+
+2. **Install Solana CLI**
+   ```powershell
+   # Open PowerShell as Administrator
+   cmd /c "curl https://release.solana.com/v1.18.0/solana-install-init-x86_64-pc-windows-msvc.exe --output C:\solana-installer.exe --silent --show-error"
+   C:\solana-installer.exe v1.18.0
    
-   # Install Anchor
+   # Add Solana to PATH (restart PowerShell after)
+   [Environment]::SetEnvironmentVariable("Path", $env:Path + ";$env:USERPROFILE\.local\share\solana\install\active_release\bin", [EnvironmentVariableTarget]::User)
+   
+   # Verify installation
+   solana --version
+   ```
+
+3. **Install Anchor Framework**
+   ```powershell
+   # Install Anchor Version Manager (AVM)
    cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
+   
+   # Install and use latest Anchor
    avm install latest
    avm use latest
-   ```
-
-2. **Set Up Database**
-   ```bash
-   # Create database
-   createdb credential_verification
    
-   # Run schema
-   psql credential_verification < database/schema.sql
+   # Verify installation
+   anchor --version
    ```
 
-3. **Deploy Solana Program**
-   ```bash
+4. **Set Up Database**
+
+   **Option A: Local PostgreSQL**
+   ```powershell
+   # After installing PostgreSQL, open pgAdmin or use psql
+   # Create database
+   createdb -U postgres credential_verification
+   
+   # Run schema (from project root)
+   psql -U postgres -d credential_verification -f database\schema.sql
+   ```
+
+   **Option B: Supabase (Recommended for Windows)**
+   1. Create account at [supabase.com](https://supabase.com)
+   2. Create new project
+   3. Go to SQL Editor
+   4. Copy and paste contents from `database\schema.sql`
+   5. Run the SQL
+   6. Copy connection string from Settings → Database
+
+5. **Deploy Solana Program**
+   ```powershell
    cd program
+   
+   # Set Solana to devnet
+   solana config set --url devnet
+   
+   # Create wallet if needed
+   solana-keygen new --outfile %USERPROFILE%\.config\solana\id.json
+   
+   # Get airdrop for devnet (if needed)
+   solana airdrop 2
+   
+   # Build the program
    anchor build
+   
+   # Deploy to devnet
    anchor deploy --provider.cluster devnet
-   # Copy program ID from Anchor.toml to backend/.env
+   
+   # Copy program ID from Anchor.toml to backend\.env
    ```
 
-4. **Backend Setup**
-   ```bash
+6. **Backend Setup**
+   ```powershell
    cd backend
+   
+   # Install dependencies
    npm install
-   # Copy .env.example to .env and configure
+   
+   # Create .env file (copy from .env.example if it exists, or create new)
+   # Edit .env with your configuration:
+   # - DATABASE_URL=postgresql://user:password@localhost:5432/credential_verification
+   #   OR use Supabase connection string
+   # - SOLANA_RPC_URL=https://api.devnet.solana.com
+   # - ANCHOR_PROGRAM_ID=<your_program_id_from_anchor_deploy>
+   
+   # Start development server
    npm run dev
    ```
 
-5. **Frontend Setup**
-   ```bash
+7. **Frontend Setup**
+   ```powershell
    cd frontend
+   
+   # Install dependencies
    npm install
+   
+   # Create .env.local (optional, for API URL customization)
+   # NEXT_PUBLIC_API_URL=http://localhost:3001/api
+   
+   # Start development server
    npm run dev
    ```
 
@@ -125,15 +192,32 @@ Visit `http://localhost:3000` to access the application.
 ## Documentation
 
 - [Product Specification](./product_spec_identity_blockchain.md) - Detailed technical specs
-- [Setup Guide](./docs/SETUP.md) - Comprehensive setup instructions
+- [Setup Guide (Linux/Mac)](./docs/SETUP.md) - Comprehensive setup instructions
+- [Windows Setup Guide](./docs/SETUP_WINDOWS.md) - **Windows-specific setup instructions**
 
 ## Development
 
+**Windows PowerShell:**
+```powershell
+# Backend dev server
+cd backend; npm run dev
+
+# Frontend dev server (in separate terminal)
+cd frontend; npm run dev
+
+# Build Solana program
+cd program; anchor build
+
+# Test Solana program
+cd program; anchor test
+```
+
+**Linux/Mac:**
 ```bash
 # Backend dev server
 cd backend && npm run dev
 
-# Frontend dev server
+# Frontend dev server (in separate terminal)
 cd frontend && npm run dev
 
 # Build Solana program
