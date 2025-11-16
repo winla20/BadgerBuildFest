@@ -8,6 +8,9 @@ edition = "2021"
 crate-type = ["cdylib", "lib"]
 name = "credential_verification"
 
+[profile.release]
+overflow-checks = true
+
 [features]
 no-entrypoint = []
 no-idl = []

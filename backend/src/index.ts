@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { db } from './config/database';
+import { connect } from './config/database';
 import authRoutes from './routes/auth';
 import credentialRoutes from './routes/credentials';
 import resumeRoutes from './routes/resume';
@@ -31,7 +31,7 @@ app.get('/health', (req, res) => {
 });
 
 // Initialize database connection
-db.connect()
+connect()
   .then(() => {
     console.log('Database connected successfully');
     app.listen(PORT, () => {

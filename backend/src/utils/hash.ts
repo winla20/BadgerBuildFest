@@ -24,9 +24,11 @@ export const hashCredential = (credential: CredentialObject): Buffer => {
 /**
  * Converts credential hash to array format for Solana program
  */
-export const hashToArray = (hash: Buffer): [number; 32] => {
-  const array = new Array(32) as [number; 32];
-  hash.copy(Buffer.from(array));
+export const hashToArray = (hash: Buffer): number[] => {
+  const array: number[] = new Array(32);
+  for (let i = 0; i < 32; i++) {
+    array[i] = hash[i];
+  }
   return array;
 };
 
